@@ -1,68 +1,95 @@
 ﻿using ExpenseTrackerAPI.Models;
 using ExpenseTrackerAPI.Services;
+using ExpenseTrackerAPI.Services.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.WebSockets;
 
-namespace ExpenseTrackerAPI.Controllers
+[ApiController]
+[Route("api/[controller]")]
+public class UserController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UserController : ControllerBase
+    private readonly IUserService _userService;
+
+    public UserController(IUserService userService)
     {
-        private readonly IUserService _userService;
+        _userService = userService;
+    }
 
-        public UserController(IUserService userService)
+    // POST: api/User
+    [HttpPost]
+    public async Task<IActionResult> CreateUser([FromBody] UserDto userDto)
+    {
+        if (userDto  == null)
         {
-            _userService = userService;
+            return BadRequest("User data is required.");
         }
 
-        // GET: api/User
-        [HttpGet]
-        public async Task<IActionResult> GetAllUsersAsync()
+        if (!ModelState.IsValid)
         {
-            var users = await _userService.GetUsersAsync();
-            return Ok(users);
+            return BadRequest(ModelState); // Return validation errors if there are any
         }
 
-        // GET: api/User/{id}
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserByIdAsync(int id)
+
+        var createdUser = await _userService.CreateUserAsync(userDto);
+
+        return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
+    }
+
+    // GET: api/User/5
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetUserById(int id)
+    {
+        var user = await _userService.GetUserByIdAsync(id);
+        if (user == null)
         {
-            var user = await _userService.GetUserByIdAsync(id);
-            if (user == null)
-                return NotFound("User not found.");
-            return Ok(user);
+            return NotFound();
+        }
+        return Ok(user);
+    }
+
+    // GET: api/User
+    [HttpGet("GetAll")]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        var users = await _userService.GetUsersAsync();
+        return Ok(users);
+    }
+
+    // PUT: api/User/5
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUser(int id, [FromBody] User user)
+    {
+        if (user == null || user.Id != id)
+        {
+            return BadRequest("User data is incorrect.");
         }
 
-        // POST: api/User
-        [HttpPost]
-        public async Task<IActionResult> CreateUserAsync([FromBody] User user)
+        var existingUser = await _userService.GetUserByIdAsync(id);
+        if (existingUser == null)
         {
-            if (user == null)
-                return BadRequest("User data is invalid.");
-
-            var createdUser = await _userService.CreateUserAsync(user);
-            return CreatedAtAction(nameof(GetUserByIdAsync), new { id = createdUser.Id }, createdUser);
+            return NotFound();
         }
 
-        // PUT: api/User/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUserAsync(int id, [FromBody] User user)
-        {
-            if (user == null || id != user.Id)
-                return BadRequest("User data is invalid.");
+        var updatedUser = await _userService.UpdateUserAsync(user);
+        return Ok(updatedUser);
+    }
 
-            var updatedUser = await _userService.UpdateUserAsync(user);
-            return Ok(updatedUser);
+    // DELETE: api/User/5
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteUser(int id)
+    {
+        var user = await _userService.GetUserByIdAsync(id);
+        if (user == null)
+        {
+            return NotFound();
         }
 
-        // DELETE: api/User/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUserAsync(int id)
+        var isDeleted = await _userService.DeleteUserAsync(id);
+        if (isDeleted)
         {
-            var success = await _userService.DeleteUserAsync(id);
-            if (!success)
-                return NotFound("User not found.");
-            return NoContent(); 
+            return NoContent(); // Successfully deleted, no content in response
         }
+
+        return BadRequest("Unable to delete user.");
     }
 }
