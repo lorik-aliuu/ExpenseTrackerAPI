@@ -2,7 +2,10 @@ using ExpenseTrackerAPI.Data;
 using ExpenseTrackerAPI.Repositories;
 using ExpenseTrackerAPI.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using ExpenseTrackerAPI.Services.Dtos;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +22,9 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
+
+builder.Services.AddControllers()
+    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserDtoValidator>());
 
 
 builder.Services.AddControllers();
