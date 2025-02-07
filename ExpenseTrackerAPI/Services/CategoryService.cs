@@ -1,65 +1,66 @@
-﻿using ExpenseTrackerAPI.Models;
+﻿using AutoMapper;
+using ExpenseTrackerAPI.Models;
 using ExpenseTrackerAPI.Repositories;
+using ExpenseTrackerAPI.Services.Dtos;
+
 
 namespace ExpenseTrackerAPI.Services
 {
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
-        private readonly IExpenseRepository _expenseRepository;
+        private readonly IMapper _mapper;
 
-        public CategoryService(ICategoryRepository categoryRepository, IExpenseRepository expenseRepository)
+        public CategoryService(ICategoryRepository categoryRepository, IMapper mapper)
         {
             _categoryRepository = categoryRepository;
-            _expenseRepository = expenseRepository;
+            _mapper = mapper;
         }
 
-        public async Task<Category> CreateCategoryAsync(Category category)
+        public async Task<CategoryDto> CreateCategoryAsync(CategoryDto categoryDto)
         {
-            return await _categoryRepository.AddCategoryAsync(category);
+            var categoryEntity = _mapper.Map<Category>(categoryDto); 
+            var createdCategory = await _categoryRepository.AddCategoryAsync(categoryEntity);
+            return _mapper.Map<CategoryDto>(createdCategory);  
         }
 
-        public async Task<IEnumerable<Category>> GetCategoriesAsync()
+        public async Task<IEnumerable<CategoryDto>> GetCategoriesAsync()
         {
-            return await _categoryRepository.GetAllCategoriesAsync();
+            var categories = await _categoryRepository.GetAllCategoriesAsync();
+            return _mapper.Map<IEnumerable<CategoryDto>>(categories);
         }
 
-        public async Task<Category> GetCategoryByIdAsync(int id)
+        public async Task<CategoryDto> GetCategoryByIdAsync(int id)
         {
-            return await _categoryRepository.GetCategoryByIdAsync(id);
+            var category = await _categoryRepository.GetCategoryByIdAsync(id);
+            if (category == null)
+            {
+                throw new KeyNotFoundException("Category not found.");
+            }
+            return _mapper.Map<CategoryDto>(category);
         }
 
-        public async Task<Category> UpdateCategoryAsync(Category category)
+        public async Task<CategoryDto> UpdateCategoryAsync(CategoryDto categoryDto)
         {
-            var existingCategory = await _categoryRepository.GetCategoryByIdAsync(category.Id);
+            var existingCategory = await _categoryRepository.GetCategoryByIdAsync(categoryDto.Id);
             if (existingCategory == null)
-                throw new KeyNotFoundException("Kategoria nuk u gjet.");
+            {
+                throw new KeyNotFoundException("Category not found.");
+            }
 
-            return await _categoryRepository.UpdateCategoryAsync(category);
+            var categoryEntity = _mapper.Map<Category>(categoryDto);
+            var updatedCategory = await _categoryRepository.UpdateCategoryAsync(categoryEntity);
+            return _mapper.Map<CategoryDto>(updatedCategory);
         }
 
         public async Task<bool> DeleteCategoryAsync(int id)
         {
             var existingCategory = await _categoryRepository.GetCategoryByIdAsync(id);
             if (existingCategory == null)
-                throw new KeyNotFoundException("Kategoria nuk u gjet.");
-
+            {
+                throw new KeyNotFoundException("Category not found.");
+            }
             return await _categoryRepository.DeleteCategoryAsync(id);
-        }
-
-        public async Task<decimal> GetCategoryTotalExpensesAsync(int categoryId)
-        {
-            var expenses = await _expenseRepository.GetAllExpensesAsync();
-            return expenses.Where(e => e.CategoryId == categoryId).Sum(e => e.Amount);
-        }
-
-        public async Task<decimal> GetCategoryBudgetAsync(int categoryId)
-        {
-            var category = await _categoryRepository.GetCategoryByIdAsync(categoryId);
-            if (category == null)
-                throw new KeyNotFoundException("Kategoria nuk ekziston.");
-
-            return category.Budget;
         }
     }
 }

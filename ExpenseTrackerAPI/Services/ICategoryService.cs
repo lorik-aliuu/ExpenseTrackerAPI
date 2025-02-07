@@ -1,21 +1,19 @@
-﻿using ExpenseTrackerAPI.Models;
+﻿using ExpenseTrackerAPI.Services.Dtos;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ExpenseTrackerAPI.Services
 {
     public interface ICategoryService
     {
-        Task<Category> CreateCategoryAsync(Category category);
+        Task<CategoryDto> CreateCategoryAsync(CategoryDto categoryDto);
 
-        Task<IEnumerable<Category>> GetCategoriesAsync();
+        Task<IEnumerable<CategoryDto>> GetCategoriesAsync();
 
-        Task<Category>UpdateCategoryAsync(Category category);
+        Task<CategoryDto> GetCategoryByIdAsync(int id);
+
+        Task<CategoryDto> UpdateCategoryAsync(CategoryDto categoryDto);
 
         Task<bool> DeleteCategoryAsync(int id);
-
-        Task<Category> GetCategoryByIdAsync(int id);
-
-        Task<decimal> GetCategoryTotalExpensesAsync(int categoryId);
-
-        Task<decimal> GetCategoryBudgetAsync(int categoryId);
     }
 }

@@ -1,86 +1,94 @@
 ﻿using ExpenseTrackerAPI.Models;
 using ExpenseTrackerAPI.Services;
-using Microsoft.AspNetCore.Authorization;
+using ExpenseTrackerAPI.Services.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
-namespace ExpenseTrackerAPI.Controllers
+[ApiController]
+[Route("api/categories")]
+public class CategoryController : ControllerBase
 {
-    [Authorize]
-    [Route("api/[controller]")]
-    [ApiController]
-    public class CategoryController : ControllerBase
+    private readonly ICategoryService _categoryService;
+
+    public CategoryController(ICategoryService categoryService)
     {
-        private readonly ICategoryService _categoryService;
+        _categoryService = categoryService;
+    }
 
-        public CategoryController(ICategoryService categoryService)
+ 
+    [HttpPost]
+    public async Task<IActionResult> CreateCategory([FromBody] CategoryDto categoryDto)
+    {
+        if (categoryDto == null)
         {
-            _categoryService = categoryService;
+            return BadRequest("Category data is required.");
         }
 
-        // GET: api/Category
-        [HttpGet]
-        public async Task<IActionResult> GetAllCategoriesAsync()
+        if (!ModelState.IsValid)
         {
-            var categories = await _categoryService.GetCategoriesAsync();
-            return Ok(categories);
+            return BadRequest(ModelState);
         }
 
-        // GET: api/Category/{id}
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetCategoryByIdAsync(int id)
+        var createdCategory = await _categoryService.CreateCategoryAsync(categoryDto);
+
+        return CreatedAtAction(nameof(GetCategoryById), new { id = createdCategory.Id }, createdCategory);
+    }
+
+  
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetCategoryById(int id)
+    {
+        var category = await _categoryService.GetCategoryByIdAsync(id);
+        if (category == null)
         {
-            var category = await _categoryService.GetCategoryByIdAsync(id);
-            if (category == null)
-                return NotFound("Category not found.");
-            return Ok(category);
+            return NotFound();
+        }
+        return Ok(category);
+    }
+
+  
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllCategories()
+    {
+        var categories = await _categoryService.GetCategoriesAsync();
+        return Ok(categories);
+    }
+
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryDto categoryDto)
+    {
+        if (categoryDto == null || categoryDto.Id != id)
+        {
+            return BadRequest("Category data is incorrect.");
         }
 
-        // POST: api/Category
-        [HttpPost]
-        public async Task<IActionResult> CreateCategoryAsync([FromBody] Category category)
+        var existingCategory = await _categoryService.GetCategoryByIdAsync(id);
+        if (existingCategory == null)
         {
-            if (category == null)
-                return BadRequest("Category data is invalid.");
-
-            var createdCategory = await _categoryService.CreateCategoryAsync(category);
-            return CreatedAtAction(nameof(GetCategoryByIdAsync), new { id = createdCategory.Id }, createdCategory);
+            return NotFound();
         }
 
-        // PUT: api/Category/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCategoryAsync(int id, [FromBody] Category category)
-        {
-            if (category == null || id != category.Id)
-                return BadRequest("Category data is invalid.");
+        var updatedCategory = await _categoryService.UpdateCategoryAsync(categoryDto);
+        return Ok(updatedCategory);
+    }
 
-            var updatedCategory = await _categoryService.UpdateCategoryAsync(category);
-            return Ok(updatedCategory);
+   
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteCategory(int id)
+    {
+        var category = await _categoryService.GetCategoryByIdAsync(id);
+        if (category == null)
+        {
+            return NotFound();
         }
 
-        // DELETE: api/Category/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCategoryAsync(int id)
+        var isDeleted = await _categoryService.DeleteCategoryAsync(id);
+        if (isDeleted)
         {
-            var success = await _categoryService.DeleteCategoryAsync(id);
-            if (!success)
-                return NotFound("Category not found.");
-            return NoContent(); 
+            return NoContent();
         }
 
-        // GET: api/Category/{id}/total-expenses
-        [HttpGet("{id}/total-expenses")]
-        public async Task<IActionResult> GetCategoryTotalExpensesAsync(int id)
-        {
-            var totalExpenses = await _categoryService.GetCategoryTotalExpensesAsync(id);
-            return Ok(totalExpenses);
-        }
-
-        // GET: api/Category/{id}/budget
-        [HttpGet("{id}/budget")]
-        public async Task<IActionResult> GetCategoryBudgetAsync(int id)
-        {
-            var budget = await _categoryService.GetCategoryBudgetAsync(id);
-            return Ok(budget);
-        }
+        return BadRequest("Unable to delete category.");
     }
 }
