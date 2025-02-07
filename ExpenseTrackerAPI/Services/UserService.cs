@@ -41,9 +41,12 @@ namespace ExpenseTrackerAPI.Services
             if (existingUser == null)
                 throw new KeyNotFoundException("User not found.");
 
-            var updatedUser = _mapper.Map<User>(userDto);
-            var result = await _userRepository.UpdateUserAsync(updatedUser);
-            return _mapper.Map<UserDto>(result);
+          
+            _mapper.Map(userDto, existingUser);
+
+            await _userRepository.UpdateUserAsync(existingUser);
+
+            return _mapper.Map<UserDto>(existingUser);
         }
 
         public async Task<bool> DeleteUserAsync(int id)
