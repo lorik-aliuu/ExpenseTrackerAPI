@@ -4,23 +4,17 @@ namespace ExpenseTrackerAPI.Services
 {
     public interface IExpenseService
     {
-        Task<Expense> CreateExpenseAsync(Expense expense);
-        Task<IEnumerable<Expense>> GetExpensesAsync();
+        Task<IEnumerable<Expense>> GetAllExpensesAsync();
         Task<Expense> GetExpenseByIdAsync(int id);
-        Task<Expense> UpdateExpenseAsync(Expense expense);
+        Task CreateExpenseAsync(Expense expense);
+        Task UpdateExpenseAsync(Expense expense);
+        Task DeleteExpenseAsync(int id);
 
-        Task<bool> DeleteExpenseAsync(int id);
-
-        Task<IEnumerable<Expense>> GetExpensesByCategoryAsync(int categoryId);
-
+        Task<Expense> GetMostExpensiveExpenseAsync();
+        Task<Expense> GetLeastExpensiveExpenseAsync();
+        Task<decimal> GetAverageDailyExpensesAsync(DateTime fromDate, DateTime toDate);
+        Task<decimal> GetAverageMonthlyExpensesAsync(DateTime fromDate, DateTime toDate);
+        Task<decimal> GetAverageYearlyExpensesAsync(DateTime fromDate, DateTime toDate);
         Task<decimal> GetTotalExpensesAsync();
-
-        Task<decimal> GetAverageDailyExpensesAsync();
-
-        Task<decimal> GetAverageMonthlyExpensesAsync();
-
-        Task<decimal> GetAverageYearlyExpensesAsync();
-
-
     }
 }

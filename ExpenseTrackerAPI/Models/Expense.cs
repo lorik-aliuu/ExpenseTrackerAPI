@@ -4,6 +4,8 @@
     {
         public int Id { get; set; }
 
+        public string Description { get; set; }
+
         //foreign key
         public int UserId { get; set; }
 
