@@ -2,52 +2,55 @@
 using ExpenseTrackerAPI.Models;
 using ExpenseTrackerAPI.Repositories;
 using ExpenseTrackerAPI.Services.Dtos;
-using System.Net.NetworkInformation;
 
 namespace ExpenseTrackerAPI.Services
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        private readonly IExpenseRepository _expenseRepository;
         private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository, IExpenseRepository expenseRepository, IMapper mapper)
+        public UserService(IUserRepository userRepository, IMapper mapper)
         {
             _userRepository = userRepository;
-            _expenseRepository = expenseRepository;
             _mapper = mapper;
         }
 
-        public async Task<User> CreateUserAsync(UserDto user)
+        public async Task<UserDto> CreateUserAsync(UserDto userDto)
         {
-            return await _userRepository.AddUserAsync(_mapper.Map<User>(user));
+            var user = _mapper.Map<User>(userDto);
+            var createdUser = await _userRepository.AddUserAsync(user);
+            return _mapper.Map<UserDto>(createdUser);
         }
 
-        public async Task<IEnumerable<User>> GetUsersAsync()
+        public async Task<IEnumerable<UserDto>> GetUsersAsync()
         {
-            return await _userRepository.GetAllUsersAsync();
+            var users = await _userRepository.GetAllUsersAsync();
+            return _mapper.Map<IEnumerable<UserDto>>(users);
         }
 
-        public async Task<User> GetUserByIdAsync(int id)
+        public async Task<UserDto> GetUserByIdAsync(int id)
         {
-            return await _userRepository.GetUserByIdAsync(id);
+            var user = await _userRepository.GetUserByIdAsync(id);
+            return _mapper.Map<UserDto>(user);
         }
 
-        public async Task<User> UpdateUserAsync(User user)
+        public async Task<UserDto> UpdateUserAsync(UserDto userDto)
         {
-            var existingUser = await _userRepository.GetUserByIdAsync(user.Id);
+            var existingUser = await _userRepository.GetUserByIdAsync(userDto.Id);
             if (existingUser == null)
-                throw new KeyNotFoundException("Përdoruesi nuk u gjet.");
+                throw new KeyNotFoundException("User not found.");
 
-            return await _userRepository.UpdateUserAsync(user);
+            var updatedUser = _mapper.Map<User>(userDto);
+            var result = await _userRepository.UpdateUserAsync(updatedUser);
+            return _mapper.Map<UserDto>(result);
         }
 
         public async Task<bool> DeleteUserAsync(int id)
         {
             var existingUser = await _userRepository.GetUserByIdAsync(id);
             if (existingUser == null)
-                throw new KeyNotFoundException("Përdoruesi nuk u gjet.");
+                throw new KeyNotFoundException("User not found.");
 
             return await _userRepository.DeleteUserAsync(id);
         }

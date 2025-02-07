@@ -2,7 +2,7 @@
 using ExpenseTrackerAPI.Services;
 using ExpenseTrackerAPI.Services.Dtos;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.WebSockets;
+using System.Threading.Tasks;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -15,27 +15,26 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    // POST: api/User
+
     [HttpPost]
     public async Task<IActionResult> CreateUser([FromBody] UserDto userDto)
     {
-        if (userDto  == null)
+        if (userDto == null)
         {
             return BadRequest("User data is required.");
         }
 
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState); // Return validation errors if there are any
+            return BadRequest(ModelState); 
         }
-
 
         var createdUser = await _userService.CreateUserAsync(userDto);
 
         return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
     }
 
-    // GET: api/User/5
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUserById(int id)
     {
@@ -47,7 +46,7 @@ public class UserController : ControllerBase
         return Ok(user);
     }
 
-    // GET: api/User
+
     [HttpGet("GetAll")]
     public async Task<IActionResult> GetAllUsers()
     {
@@ -55,11 +54,11 @@ public class UserController : ControllerBase
         return Ok(users);
     }
 
-    // PUT: api/User/5
+
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(int id, [FromBody] User user)
+    public async Task<IActionResult> UpdateUser(int id, [FromBody] UserDto userDto)
     {
-        if (user == null || user.Id != id)
+        if (userDto == null || userDto.Id != id)
         {
             return BadRequest("User data is incorrect.");
         }
@@ -70,11 +69,10 @@ public class UserController : ControllerBase
             return NotFound();
         }
 
-        var updatedUser = await _userService.UpdateUserAsync(user);
+        var updatedUser = await _userService.UpdateUserAsync(userDto); 
         return Ok(updatedUser);
     }
 
-    // DELETE: api/User/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(int id)
     {
@@ -87,7 +85,7 @@ public class UserController : ControllerBase
         var isDeleted = await _userService.DeleteUserAsync(id);
         if (isDeleted)
         {
-            return NoContent(); // Successfully deleted, no content in response
+            return NoContent(); 
         }
 
         return BadRequest("Unable to delete user.");

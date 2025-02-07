@@ -5,13 +5,13 @@ namespace ExpenseTrackerAPI.Services
 {
     public interface IUserService
     {
-        Task<User> CreateUserAsync(UserDto user);
+        Task<UserDto> CreateUserAsync(UserDto user);
 
-        Task<IEnumerable<User>> GetUsersAsync();
+        Task<IEnumerable<UserDto>> GetUsersAsync();
 
-        Task<User> GetUserByIdAsync(int id);
+        Task<UserDto> GetUserByIdAsync(int id);
 
-        Task<User> UpdateUserAsync(User user);
+        Task<UserDto> UpdateUserAsync(UserDto user);
 
         Task<bool> DeleteUserAsync(int id);
 
