@@ -120,4 +120,15 @@ public class ExpenseController : ControllerBase
         var totalExpenses = await _expenseService.GetTotalExpensesAsync();
         return Ok(totalExpenses);
     }
+
+    [HttpGet("get-user-with-highest-total-expenses")]
+    public async Task<IActionResult> GetUserWithHighestTotalExpenses()
+    {
+        var user = await _expenseService.GetUserWithHighestTotalExpensesAsync();
+        if (user == null)
+        {
+            return NotFound("No user found with expenses.");
+        }
+        return Ok(user);
+    }
 }

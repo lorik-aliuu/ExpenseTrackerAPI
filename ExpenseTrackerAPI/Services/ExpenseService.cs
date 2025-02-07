@@ -135,5 +135,29 @@ namespace ExpenseTrackerAPI.Services
         {
             return (await _expenseRepository.GetAllExpensesAsync()).Sum(e => e.Amount);
         }
+
+        public async Task<UserDto> GetUserWithHighestTotalExpensesAsync()
+        {
+            var expenses = await _expenseRepository.GetAllExpensesAsync();
+
+           
+            var userExpenses = expenses
+                .GroupBy(e => e.UserId)
+                .Select(g => new
+                {
+                    UserId = g.Key,
+                    TotalAmount = g.Sum(e => e.Amount)
+                })
+                .OrderByDescending(g => g.TotalAmount)
+                .FirstOrDefault();
+
+            if (userExpenses == null)
+                return null;
+
+          
+            var user = await _userRepository.GetUserByIdAsync(userExpenses.UserId);
+            return _mapper.Map<UserDto>(user);
+        }
+
     }
 }

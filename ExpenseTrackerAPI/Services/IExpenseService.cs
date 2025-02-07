@@ -17,5 +17,7 @@ namespace ExpenseTrackerAPI.Services
         Task<decimal> GetAverageMonthlyExpensesAsync(DateTime fromDate, DateTime toDate);
         Task<decimal> GetAverageYearlyExpensesAsync(DateTime fromDate, DateTime toDate);
         Task<decimal> GetTotalExpensesAsync();
+
+        Task<UserDto> GetUserWithHighestTotalExpensesAsync();
     }
 }
