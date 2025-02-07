@@ -1,5 +1,8 @@
-﻿using ExpenseTrackerAPI.Models;
+﻿using AutoMapper;
+using ExpenseTrackerAPI.Models;
 using ExpenseTrackerAPI.Repositories;
+using ExpenseTrackerAPI.Services.Dtos;
+using System.Net.NetworkInformation;
 
 namespace ExpenseTrackerAPI.Services
 {
@@ -7,16 +10,18 @@ namespace ExpenseTrackerAPI.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IExpenseRepository _expenseRepository;
+        private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository, IExpenseRepository expenseRepository)
+        public UserService(IUserRepository userRepository, IExpenseRepository expenseRepository, IMapper mapper)
         {
             _userRepository = userRepository;
             _expenseRepository = expenseRepository;
+            _mapper = mapper;
         }
 
-        public async Task<User> CreateUserAsync(User user)
+        public async Task<User> CreateUserAsync(UserDto user)
         {
-            return await _userRepository.AddUserAsync(user);
+            return await _userRepository.AddUserAsync(_mapper.Map<User>(user));
         }
 
         public async Task<IEnumerable<User>> GetUsersAsync()

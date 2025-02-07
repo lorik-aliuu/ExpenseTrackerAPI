@@ -1,10 +1,11 @@
 ﻿using ExpenseTrackerAPI.Models;
+using ExpenseTrackerAPI.Services.Dtos;
 
 namespace ExpenseTrackerAPI.Services
 {
     public interface IUserService
     {
-        Task<User> CreateUserAsync(User user);
+        Task<User> CreateUserAsync(UserDto user);
 
         Task<IEnumerable<User>> GetUsersAsync();
 
