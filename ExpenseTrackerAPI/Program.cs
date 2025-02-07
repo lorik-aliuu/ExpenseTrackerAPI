@@ -1,5 +1,5 @@
 using ExpenseTrackerAPI.Data;
-using ExpenseTrackerAPI.Data.Repositories;
+using ExpenseTrackerAPI.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 

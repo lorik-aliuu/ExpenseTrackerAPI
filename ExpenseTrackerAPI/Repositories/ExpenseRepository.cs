@@ -1,7 +1,8 @@
-﻿using ExpenseTrackerAPI.Models;
+﻿using ExpenseTrackerAPI.Data;
+using ExpenseTrackerAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ExpenseTrackerAPI.Data.Repositories
+namespace ExpenseTrackerAPI.Repositories
 {
     public class ExpenseRepository : IExpenseRepository
     {
@@ -40,7 +41,7 @@ namespace ExpenseTrackerAPI.Data.Repositories
         public async Task<bool> DeleteExpenseAsync(int id)
         {
             var expense = await _context.Expenses.FindAsync(id);
-            if(expense == null)
+            if (expense == null)
             {
                 return false;
             }

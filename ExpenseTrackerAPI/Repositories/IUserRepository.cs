@@ -1,6 +1,6 @@
 ﻿using ExpenseTrackerAPI.Models;
 
-namespace ExpenseTrackerAPI.Data.Repositories
+namespace ExpenseTrackerAPI.Repositories
 {
     public interface IUserRepository
     {

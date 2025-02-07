@@ -1,7 +1,8 @@
-﻿using ExpenseTrackerAPI.Models;
+﻿using ExpenseTrackerAPI.Data;
+using ExpenseTrackerAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ExpenseTrackerAPI.Data.Repositories
+namespace ExpenseTrackerAPI.Repositories
 {
     public class CategoryRepository : ICategoryRepository
     {
