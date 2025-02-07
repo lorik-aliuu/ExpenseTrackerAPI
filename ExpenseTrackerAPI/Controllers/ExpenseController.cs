@@ -1,131 +1,81 @@
-﻿using ExpenseTrackerAPI.Models;
-using ExpenseTrackerAPI.Services;
+﻿using ExpenseTrackerAPI.Services;
+using ExpenseTrackerAPI.Services.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ExpenseTrackerAPI.Controllers
+[ApiController]
+[Route("api/[controller]")]
+public class ExpenseController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ExpenseController : ControllerBase
+    private readonly IExpenseService _expenseService;
+
+    public ExpenseController(IExpenseService expenseService)
     {
-        private readonly IExpenseService _expenseService;
+        _expenseService = expenseService;
+    }
 
-        public ExpenseController(IExpenseService expenseService)
+  
+    [HttpPost]
+    public async Task<IActionResult> CreateExpense([FromBody] ExpenseDTO expenseDto)
+    {
+        if (expenseDto == null)
         {
-            _expenseService = expenseService;
+            return BadRequest("Expense data is required.");
         }
 
-        // Get All Expenses
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Expense>>> GetAllExpenses()
+        if (!ModelState.IsValid)
         {
-            var expenses = await _expenseService.GetAllExpensesAsync();
-            return Ok(expenses);
+            return BadRequest(ModelState);
         }
 
-        // Get Expense by ID
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Expense>> GetExpenseById(int id)
+        await _expenseService.CreateExpenseAsync(expenseDto);
+
+        return CreatedAtAction(nameof(GetExpenseById), new { id = expenseDto.Id }, expenseDto);
+    }
+
+ 
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetExpenseById(int id)
+    {
+        var expense = await _expenseService.GetExpenseByIdAsync(id);
+        if (expense == null)
         {
-            var expense = await _expenseService.GetExpenseByIdAsync(id);
-            if (expense == null)
-            {
-                return NotFound($"Expense with ID {id} not found.");
-            }
-            return Ok(expense);
+            return NotFound();
+        }
+        return Ok(expense);
+    }
+
+  
+    [HttpGet("GetAll")]
+    public async Task<IActionResult> GetAllExpenses()
+    {
+        var expenses = await _expenseService.GetAllExpensesAsync();
+        return Ok(expenses);
+    }
+
+ 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateExpense(int id, [FromBody] ExpenseDTO expenseDto)
+    {
+        if (expenseDto == null || expenseDto.Id != id)
+        {
+            return BadRequest("Expense data is incorrect.");
         }
 
-        // Create Expense
-        [HttpPost]
-        public async Task<ActionResult<Expense>> CreateExpense([FromBody] Expense expense)
+        await _expenseService.UpdateExpenseAsync(expenseDto);
+        return Ok(expenseDto);
+    }
+
+   
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteExpense(int id)
+    {
+        var expense = await _expenseService.GetExpenseByIdAsync(id);
+        if (expense == null)
         {
-            try
-            {
-                await _expenseService.CreateExpenseAsync(expense);
-                return CreatedAtAction(nameof(GetExpenseById), new { id = expense.Id }, expense);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return NotFound();
         }
 
-        // Update Expense
-        [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateExpense(int id, [FromBody] Expense expense)
-        {
-            if (id != expense.Id)
-            {
-                return BadRequest("Expense ID mismatch.");
-            }
-
-            try
-            {
-                await _expenseService.UpdateExpenseAsync(expense);
-                return NoContent(); // Success, no content to return
-            }
-            catch (Exception ex)
-            {
-                return NotFound($"Expense with ID {id} not found. {ex.Message}");
-            }
-        }
-
-        // Delete Expense
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteExpense(int id)
-        {
-            try
-            {
-                await _expenseService.DeleteExpenseAsync(id);
-                return NoContent(); // Success, no content to return
-            }
-            catch (Exception ex)
-            {
-                return NotFound($"Expense with ID {id} not found. {ex.Message}");
-            }
-        }
-
-        // Get Most Expensive Expense
-        [HttpGet("most-expensive")]
-        public async Task<ActionResult<Expense>> GetMostExpensiveExpense()
-        {
-            var expense = await _expenseService.GetMostExpensiveExpenseAsync();
-            if (expense == null)
-                return NotFound("No expenses found.");
-            return Ok(expense);
-        }
-
-        // Get Least Expensive Expense
-        [HttpGet("least-expensive")]
-        public async Task<ActionResult<Expense>> GetLeastExpensiveExpense()
-        {
-            var expense = await _expenseService.GetLeastExpensiveExpenseAsync();
-            if (expense == null)
-                return NotFound("No expenses found.");
-            return Ok(expense);
-        }
-
-        // Get Average Daily Expenses
-        [HttpGet("average-daily-expenses")]
-        public async Task<ActionResult<decimal>> GetAverageDailyExpenses([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
-        {
-            try
-            {
-                var avg = await _expenseService.GetAverageDailyExpensesAsync(fromDate, toDate);
-                return Ok(avg);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        // Get Total Expenses
-        [HttpGet("total-expenses")]
-        public async Task<ActionResult<decimal>> GetTotalExpenses()
-        {
-            var total = await _expenseService.GetTotalExpensesAsync();
-            return Ok(total);
-        }
+        await _expenseService.DeleteExpenseAsync(id);
+        return NoContent();
     }
 }

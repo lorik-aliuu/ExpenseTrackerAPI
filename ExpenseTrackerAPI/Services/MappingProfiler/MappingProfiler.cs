@@ -12,6 +12,8 @@ namespace ExpenseTrackerAPI.Services.MappingProfiler
         public MappingProfiler()
         {
             CreateMap<User, UserDto>().ReverseMap();
+            CreateMap<Category, CategoryDto>().ReverseMap();
+            CreateMap<Expense, ExpenseDTO>().ReverseMap();
         }
     }
 }

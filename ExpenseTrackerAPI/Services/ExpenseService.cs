@@ -1,5 +1,7 @@
 ﻿using ExpenseTrackerAPI.Models;
 using ExpenseTrackerAPI.Repositories;
+using ExpenseTrackerAPI.Services.Dtos;
+using AutoMapper;
 
 namespace ExpenseTrackerAPI.Services
 {
@@ -8,26 +10,32 @@ namespace ExpenseTrackerAPI.Services
         private readonly IExpenseRepository _expenseRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IMapper _mapper;
 
-        public ExpenseService(IExpenseRepository expenseRepository, ICategoryRepository categoryRepository, IUserRepository userRepository)
+        public ExpenseService(IExpenseRepository expenseRepository, ICategoryRepository categoryRepository, IUserRepository userRepository, IMapper mapper)
         {
             _expenseRepository = expenseRepository;
             _categoryRepository = categoryRepository;
             _userRepository = userRepository;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<Expense>> GetAllExpensesAsync()
+        public async Task<IEnumerable<ExpenseDTO>> GetAllExpensesAsync()
         {
-            return await _expenseRepository.GetAllExpensesAsync();
+            var expenses = await _expenseRepository.GetAllExpensesAsync();
+            return _mapper.Map<IEnumerable<ExpenseDTO>>(expenses);
         }
 
-        public async Task<Expense> GetExpenseByIdAsync(int id)
+        public async Task<ExpenseDTO> GetExpenseByIdAsync(int id)
         {
-            return await _expenseRepository.GetExpenseByIdAsync(id);
+            var expense = await _expenseRepository.GetExpenseByIdAsync(id);
+            return _mapper.Map<ExpenseDTO>(expense);
         }
 
-        public async Task CreateExpenseAsync(Expense expense)
+        public async Task CreateExpenseAsync(ExpenseDTO expenseDto)
         {
+            var expense = _mapper.Map<Expense>(expenseDto);
+
             var category = await _categoryRepository.GetCategoryByIdAsync(expense.CategoryId);
             if (category == null)
                 throw new ArgumentException("Kategoria nuk ekziston.");
@@ -56,8 +64,10 @@ namespace ExpenseTrackerAPI.Services
             await _expenseRepository.AddExpenseAsync(expense);
         }
 
-        public async Task UpdateExpenseAsync(Expense expense)
+        public async Task UpdateExpenseAsync(ExpenseDTO expenseDto)
         {
+            var expense = _mapper.Map<Expense>(expenseDto);
+
             var existingExpense = await _expenseRepository.GetExpenseByIdAsync(expense.Id);
             if (existingExpense == null)
                 throw new KeyNotFoundException("Shpenzimi nuk u gjet.");
@@ -74,16 +84,18 @@ namespace ExpenseTrackerAPI.Services
             await _expenseRepository.DeleteExpenseAsync(id);
         }
 
-        public async Task<Expense> GetMostExpensiveExpenseAsync()
+        public async Task<ExpenseDTO> GetMostExpensiveExpenseAsync()
         {
             var expenses = await _expenseRepository.GetAllExpensesAsync();
-            return expenses.OrderByDescending(e => e.Amount).FirstOrDefault();
+            var mostExpensiveExpense = expenses.OrderByDescending(e => e.Amount).FirstOrDefault();
+            return _mapper.Map<ExpenseDTO>(mostExpensiveExpense);
         }
 
-        public async Task<Expense> GetLeastExpensiveExpenseAsync()
+        public async Task<ExpenseDTO> GetLeastExpensiveExpenseAsync()
         {
             var expenses = await _expenseRepository.GetAllExpensesAsync();
-            return expenses.OrderBy(e => e.Amount).FirstOrDefault();
+            var leastExpensiveExpense = expenses.OrderBy(e => e.Amount).FirstOrDefault();
+            return _mapper.Map<ExpenseDTO>(leastExpensiveExpense);
         }
 
         public async Task<decimal> GetAverageDailyExpensesAsync(DateTime fromDate, DateTime toDate)
@@ -103,7 +115,7 @@ namespace ExpenseTrackerAPI.Services
                             .Where(e => e.Date >= fromDate && e.Date <= toDate);
 
             int months = (toDate.Year - fromDate.Year) * 12 + (toDate.Month - fromDate.Month) + 1;
-            if (months == 0) months = 1; 
+            if (months == 0) months = 1;
 
             return expenses.Any() ? expenses.Sum(e => e.Amount) / months : 0;
         }
@@ -114,7 +126,7 @@ namespace ExpenseTrackerAPI.Services
                             .Where(e => e.Date >= fromDate && e.Date <= toDate);
 
             int years = toDate.Year - fromDate.Year + 1;
-            if (years == 0) years = 1; 
+            if (years == 0) years = 1;
 
             return expenses.Any() ? expenses.Sum(e => e.Amount) / years : 0;
         }
