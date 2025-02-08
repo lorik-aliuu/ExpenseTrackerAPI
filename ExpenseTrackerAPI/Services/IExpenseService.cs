@@ -7,9 +7,9 @@ namespace ExpenseTrackerAPI.Services
     {
         Task<IEnumerable<ExpenseDTO>> GetAllExpensesAsync();
         Task<ExpenseDTO> GetExpenseByIdAsync(int id);
-        Task CreateExpenseAsync(ExpenseDTO expense);
-        Task UpdateExpenseAsync(ExpenseDTO expense);
-        Task DeleteExpenseAsync(int id);
+        Task<ExpenseDTO> CreateExpenseAsync(ExpenseDTO expense);
+        Task<ExpenseDTO> UpdateExpenseAsync(ExpenseDTO expense);
+        Task<bool> DeleteExpenseAsync(int id);
 
         Task<ExpenseDTO> GetMostExpensiveExpenseAsync();
         Task<ExpenseDTO> GetLeastExpensiveExpenseAsync();
@@ -21,5 +21,7 @@ namespace ExpenseTrackerAPI.Services
         Task<UserDto> GetUserWithHighestTotalExpensesAsync();
 
         Task<CategoryDto> GetMostFrequentlyUsedCategoryAsync();
+
+        Task<string> GetMonthWithHighestAverageDailySpendingAsync();
     }
 }

@@ -32,7 +32,7 @@ namespace ExpenseTrackerAPI.Services
             return _mapper.Map<ExpenseDTO>(expense);
         }
 
-        public async Task CreateExpenseAsync(ExpenseDTO expenseDto)
+        public async Task<ExpenseDTO> CreateExpenseAsync(ExpenseDTO expenseDto)
         {
             var expense = _mapper.Map<Expense>(expenseDto);
 
@@ -62,9 +62,10 @@ namespace ExpenseTrackerAPI.Services
                 expense.Date = DateTime.Now;
 
             await _expenseRepository.AddExpenseAsync(expense);
+            return _mapper.Map<ExpenseDTO>(expense);
         }
 
-        public async Task UpdateExpenseAsync(ExpenseDTO expenseDto)
+        public async Task<ExpenseDTO> UpdateExpenseAsync(ExpenseDTO expenseDto)
         {
             var expense = _mapper.Map<Expense>(expenseDto);
 
@@ -73,15 +74,16 @@ namespace ExpenseTrackerAPI.Services
                 throw new KeyNotFoundException("Shpenzimi nuk u gjet.");
 
             await _expenseRepository.UpdateExpenseAsync(expense);
+            return _mapper.Map<ExpenseDTO>(expense);
         }
 
-        public async Task DeleteExpenseAsync(int id)
+        public async Task<bool> DeleteExpenseAsync(int id)
         {
             var expense = await _expenseRepository.GetExpenseByIdAsync(id);
             if (expense == null)
                 throw new KeyNotFoundException("Shpenzimi nuk u gjet.");
 
-            await _expenseRepository.DeleteExpenseAsync(id);
+            return await _expenseRepository.DeleteExpenseAsync(id);
         }
 
         public async Task<ExpenseDTO> GetMostExpensiveExpenseAsync()
@@ -174,6 +176,28 @@ namespace ExpenseTrackerAPI.Services
             var category = await _categoryRepository.GetCategoryByIdAsync(mostUsedCategory.CategoryId);
             return _mapper.Map<CategoryDto>(category);
         }
+
+        public async Task<string> GetMonthWithHighestAverageDailySpendingAsync()
+        {
+            var expenses = await _expenseRepository.GetAllExpensesAsync();
+
+            var highestSpendingMonth = expenses
+                .GroupBy(e => new { e.Date.Year, e.Date.Month })
+                .Select(g => new
+                {
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
+                    AvgDailySpending = g.Sum(e => e.Amount) / g.Select(e => e.Date.Date).Distinct().Count()
+                })
+                .OrderByDescending(g => g.AvgDailySpending)
+                .FirstOrDefault();
+
+            if (highestSpendingMonth == null)
+                throw new InvalidOperationException("No expenses found.");
+
+            return $"{highestSpendingMonth.Year}-{highestSpendingMonth.Month}";
+        }
+
 
     }
 }

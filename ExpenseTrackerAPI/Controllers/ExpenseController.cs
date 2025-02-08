@@ -56,10 +56,9 @@ public class ExpenseController : ControllerBase
     [HttpPut("updatebyid")]
     public async Task<IActionResult> UpdateExpense([FromBody] ExpenseDTO expenseDto)
     {
-      
 
-        await _expenseService.UpdateExpenseAsync(expenseDto);
-        return Ok(expenseDto);
+        var updatedExpense = await _expenseService.UpdateExpenseAsync(expenseDto);
+        return Ok(updatedExpense);
     }
 
    
@@ -136,4 +135,12 @@ public class ExpenseController : ControllerBase
         var category = await _expenseService.GetMostFrequentlyUsedCategoryAsync();
         return Ok(category);
     }
+
+    [HttpGet("get-highest-avgdaily-spending-month")]
+    public async Task<IActionResult> GetMonthWithHighestAverageDailySpending()
+    {
+        var result = await _expenseService.GetMonthWithHighestAverageDailySpendingAsync();
+        return Ok(result);
+    }
+
 }

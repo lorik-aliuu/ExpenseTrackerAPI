@@ -56,18 +56,8 @@ public class CategoryController : ControllerBase
 
 
     [HttpPut("updatebyid")]
-    public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryDto categoryDto)
+    public async Task<IActionResult> UpdateCategory([FromBody] CategoryDto categoryDto)
     {
-        if (categoryDto == null || categoryDto.Id != id)
-        {
-            return BadRequest("Category data is incorrect.");
-        }
-
-        var existingCategory = await _categoryService.GetCategoryByIdAsync(id);
-        if (existingCategory == null)
-        {
-            return NotFound();
-        }
 
         var updatedCategory = await _categoryService.UpdateCategoryAsync(categoryDto);
         return Ok(updatedCategory);
