@@ -1,6 +1,7 @@
 ﻿using ExpenseTrackerAPI.Data;
 using ExpenseTrackerAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 namespace ExpenseTrackerAPI.Repositories
 {
@@ -50,6 +51,12 @@ namespace ExpenseTrackerAPI.Repositories
             return true;
 
 
+        }
+
+        public async Task<User> IsAuthenticated(string userName, string password)
+        {
+
+            return await _context.Users.FirstOrDefaultAsync(user => user.UserName == userName && user.Password == password);
         }
     }
 }

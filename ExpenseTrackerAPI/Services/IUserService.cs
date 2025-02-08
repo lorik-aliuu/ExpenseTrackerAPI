@@ -15,5 +15,7 @@ namespace ExpenseTrackerAPI.Services
 
         Task<bool> DeleteUserAsync(int id);
 
+        Task<bool> IsAuthenticated(string userName, string password);
+
     }
 }

@@ -57,5 +57,15 @@ namespace ExpenseTrackerAPI.Services
 
             return await _userRepository.DeleteUserAsync(id);
         }
+
+        public async Task<bool> IsAuthenticated(string userName, string password)
+        {
+            var user = await _userRepository.IsAuthenticated(userName, password);
+
+            if (user != null)
+                return true;
+            return false;
+
+        }
     }
 }
