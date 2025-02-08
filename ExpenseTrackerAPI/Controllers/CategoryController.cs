@@ -16,7 +16,7 @@ public class CategoryController : ControllerBase
     }
 
  
-    [HttpPost]
+    [HttpPost("create")]
     public async Task<IActionResult> CreateCategory([FromBody] CategoryDto categoryDto)
     {
         if (categoryDto == null)
@@ -35,7 +35,7 @@ public class CategoryController : ControllerBase
     }
 
   
-    [HttpGet("{id}")]
+    [HttpGet("getbyid")]
     public async Task<IActionResult> GetCategoryById(int id)
     {
         var category = await _categoryService.GetCategoryByIdAsync(id);
@@ -47,7 +47,7 @@ public class CategoryController : ControllerBase
     }
 
   
-    [HttpGet("all")]
+    [HttpGet("getall")]
     public async Task<IActionResult> GetAllCategories()
     {
         var categories = await _categoryService.GetCategoriesAsync();
@@ -55,7 +55,7 @@ public class CategoryController : ControllerBase
     }
 
 
-    [HttpPut("{id}")]
+    [HttpPut("updatebyid")]
     public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryDto categoryDto)
     {
         if (categoryDto == null || categoryDto.Id != id)
@@ -74,8 +74,8 @@ public class CategoryController : ControllerBase
     }
 
    
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteCategory(int id)
+    [HttpDelete("delete/{id}")]
+    public async Task<IActionResult> DeleteCategory([FromRoute]int id)
     {
         var category = await _categoryService.GetCategoryByIdAsync(id);
         if (category == null)

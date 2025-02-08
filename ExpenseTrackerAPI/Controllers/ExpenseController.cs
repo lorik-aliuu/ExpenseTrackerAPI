@@ -3,7 +3,7 @@ using ExpenseTrackerAPI.Services.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/expense")]
 public class ExpenseController : ControllerBase
 {
     private readonly IExpenseService _expenseService;
@@ -14,7 +14,7 @@ public class ExpenseController : ControllerBase
     }
 
   
-    [HttpPost("AddExpense")]
+    [HttpPost("create")]
     public async Task<IActionResult> CreateExpense([FromBody] ExpenseDTO expenseDto)
     {
         if (expenseDto == null)
@@ -33,7 +33,7 @@ public class ExpenseController : ControllerBase
     }
 
  
-    [HttpGet("GetExpenseById")]
+    [HttpGet("getbyid")]
     public async Task<IActionResult> GetExpenseById(int id)
     {
         var expense = await _expenseService.GetExpenseByIdAsync(id);
@@ -45,7 +45,7 @@ public class ExpenseController : ControllerBase
     }
 
   
-    [HttpGet("GetAllExpenses")]
+    [HttpGet("getall")]
     public async Task<IActionResult> GetAllExpenses()
     {
         var expenses = await _expenseService.GetAllExpensesAsync();
@@ -53,21 +53,18 @@ public class ExpenseController : ControllerBase
     }
 
  
-    [HttpPut("UpdateById")]
-    public async Task<IActionResult> UpdateExpense(int id, [FromBody] ExpenseDTO expenseDto)
+    [HttpPut("updatebyid")]
+    public async Task<IActionResult> UpdateExpense([FromBody] ExpenseDTO expenseDto)
     {
-        if (expenseDto == null || expenseDto.Id != id)
-        {
-            return BadRequest("Expense data is incorrect.");
-        }
+      
 
         await _expenseService.UpdateExpenseAsync(expenseDto);
         return Ok(expenseDto);
     }
 
    
-    [HttpDelete("DeleteById")]
-    public async Task<IActionResult> DeleteExpense(int id)
+    [HttpDelete("delete/{id}")]
+    public async Task<IActionResult> DeleteExpense([FromRoute]int id)
     {
         var expense = await _expenseService.GetExpenseByIdAsync(id);
         if (expense == null)
