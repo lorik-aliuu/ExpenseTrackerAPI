@@ -19,5 +19,7 @@ namespace ExpenseTrackerAPI.Services
         Task<decimal> GetTotalExpensesAsync();
 
         Task<UserDto> GetUserWithHighestTotalExpensesAsync();
+
+        Task<CategoryDto> GetMostFrequentlyUsedCategoryAsync();
     }
 }

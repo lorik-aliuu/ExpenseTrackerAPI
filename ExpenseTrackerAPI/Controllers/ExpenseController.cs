@@ -128,4 +128,12 @@ public class ExpenseController : ControllerBase
         }
         return Ok(user);
     }
+
+    [HttpGet("get-most-used-category")]
+
+    public async Task<IActionResult> GetMostFrequentlyUsedCategory()
+    {
+        var category = await _expenseService.GetMostFrequentlyUsedCategoryAsync();
+        return Ok(category);
+    }
 }

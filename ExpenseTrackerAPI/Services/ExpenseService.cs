@@ -159,5 +159,21 @@ namespace ExpenseTrackerAPI.Services
             return _mapper.Map<UserDto>(user);
         }
 
+        public async Task<CategoryDto> GetMostFrequentlyUsedCategoryAsync()
+        {
+            var expenses = await _expenseRepository.GetAllExpensesAsync();
+
+            var mostUsedCategory = expenses.GroupBy(e => e.CategoryId)
+                .OrderByDescending(g => g.Count())
+                .Select(g => new { CategoryId = g.Key, Count = g.Count() })
+                .FirstOrDefault();
+
+            if (mostUsedCategory == null)
+                throw new InvalidOperationException("No expenses found");
+
+            var category = await _categoryRepository.GetCategoryByIdAsync(mostUsedCategory.CategoryId);
+            return _mapper.Map<CategoryDto>(category);
+        }
+
     }
 }
